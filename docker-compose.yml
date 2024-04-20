@@ -1,0 +1,14 @@
+version: '3.8'
+
+services:
+  ministry:
+    build: ministry
+    ports:
+      - "8080:8080"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    environment:
+      MINISTRY_DEBUG: "true"

@@ -1,13 +1,15 @@
-FROM golang:1.22 AS build
+FROM golang AS builder
 
-COPY main.go go.mod go.sum /app/
 WORKDIR /app
+ADD go.mod go.sum ./
+RUN go mod download && go mod verify
 
-RUN go mod download
-RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o ministry .
+ADD internal/ internal/
+ADD cmd/ cmd/
 
-FROM scratch AS runtime
+RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o ministry ./cmd/ministry
 
-COPY --from=build /app/ministry /ministry
-
-ENTRYPOINT ["/ministry"]
+FROM alpine:latest
+WORKDIR /app
+COPY --from=builder /app/ministry .
+CMD ["./ministry"]
