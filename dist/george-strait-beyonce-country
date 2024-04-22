@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>TotallyRealFacts</title>
+    <link rel="stylesheet" href="/css/style.css">
+  </head>
+  <body>
+    <header>
+      <h1>TotallyRealFacts</h1>
+    </header>
+    <main>
+      <section class="header-title-container">
+        <h1>George Strait Said of Beyoncé, &#39;Playing Dress-Up Don&#39;t Make You Country&#39;?</h1>
+        <h2>&#34;The best part is when it ended,&#34; Strait allegedly said about Beyoncé&#39;s latest album.</h2>
+        <div class="author-date-container">
+          <h3>By Real Authorington</h3>
+          <h2>Published April 22, 2024</h2>
+        </div>
+      </section>
+      <article>
+        <section class="claim-and-rating">
+          <div class="claim-content-container">
+            <div class="label-wrapper">Claim:</div>
+            <div class="claim-text">Singer George Strait dismissed Beyoncé as a country artist, saying, &#34;Playing dress-up don&#39;t make you country.&#34;</h3>
+          </div>
+          <div class="claim-rating-container">
+            <div class="label-wrapper">Rating:</div>
+            <div class="rating-text">True</div>
+          </div>
+          
+        </section>
+        
+        <p>NOT On April 10, 2024, the Facebook page of America&#39;s Last Line of Defense published an article positing that singer-songwriter George Strait had dismissed Beyoncé as a country artist ( archived ):</p>
+        
+        <p>Nashville Legend George Strait Weighs in on Beyonce [sic]: &#34;Playing Dress-Up Don&#39;t Make You Country&#34;</p>
+        
+        <p>&#34;I listened to it for as long as I could,&#34; Strait told us in an exclusive interview, &#34;The best part about it was when it ended.&#34;</p>
+        
+        <p>Strait says he&#39;ll fight against the album receiving nominations at any country awards show.</p>
+        
+        <p>This item was not a factual recounting of real-life events. The article originated with a website that describes its output as being humorous or satirical in nature. On its main Facebook page, America&#39;s Last Line of Defense says:</p>
+        
+        <p>The flagship of the ALLOD network of trollery.  Nothing on this page is real.</p>
+        
+        <p>For background, here is why we sometimes write about satire/humor.</p>
+        
+      </article>
+    </main>
+  </body>
+</html>

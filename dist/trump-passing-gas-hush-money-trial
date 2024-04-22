@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>TotallyRealFacts</title>
+    <link rel="stylesheet" href="/css/style.css">
+  </head>
+  <body>
+    <header>
+      <h1>TotallyRealFacts</h1>
+    </header>
+    <main>
+      <section class="header-title-container">
+        <h1>No Evidence Trump Passed Gas in Courtroom During Hush-Money Trial</h1>
+        <h2>Claims of presidential flatulence are a mainstay here at Snopes.</h2>
+        <div class="author-date-container">
+          <h3>By Real Authorington</h3>
+          <h2>Published April 19, 2024</h2>
+        </div>
+      </section>
+      <article>
+        <section class="claim-and-rating">
+          <div class="claim-content-container">
+            <div class="label-wrapper">Claim:</div>
+            <div class="claim-text">During former President Donald Trump&#39;s April 2024 hush-money trial in New York City, he passed gas repeatedly while his lawyers struggled with the smell.</h3>
+          </div>
+          <div class="claim-rating-container">
+            <div class="label-wrapper">Rating:</div>
+            <div class="rating-text">True</div>
+          </div>
+          
+        </section>
+        
+        <p>NOT On April 15, 2024, the first day of the criminal trial against former U.S. President Donald Trump, The New York Times&#39; Maggie Haberman reported  Trump appeared to be falling asleep during court proceedings. The news went viral immediately .</p>
+        
+        <p>Days later, a new, unconfirmed rumor joined the media circus: The former president had been rather … flatulent. The claim appeared on April 19, 2024, in a clip posted by the X (formerly Twitter) account @Acyn of an interview on the MeidasTouch network, a progressive media organization .</p>
+        
+        <p>In the clip, the founder of MeidasTouch, Ben Meiselas, talked about how he had heard from credible sources that Trump&#39;s gas was noxious enough to make his lawyers struggle with the smell. Meiselas did not name his sources, and almost backed off from the claim at the end: &#34;Take it for what it&#39;s worth, they may be going on background telling me that because it&#39;s the Meidas Touch and they think that we want to hear that.&#34;</p>
+        
+        <p>The claim was backed up by George Conway, who was married to Trump aide Kellyanne Conway until 2023 and has vocally campaigned against the former president. Conway said on his X account he had heard similar rumors:</p>
+        
+        <p>Snopes performed its own investigation into whether this rumor passed the smell test  but came up short — everything we found could be traced back to either Meiselas or Conway. Because neither of them shared who their sources were, and no major news outlet had covered the supposed flatulence, we have rated this claim as &#34;Unproven.&#34;</p>
+        
+        <p>There&#39;s a long history of making fun of minor presidential gaffes, like a &#34;Saturday Night Live&#34; take on Gerald Ford , inspired by the time he fell down the stairs of Air Force One. When that claim is about the president &#39; s supposed flatulence , it&#39;s often an implication that the person is growing senile and might be unfit to serve. But as Snopes summarized in 2022 , claims about embarrassing behavior by a president, current or former, are not new, no matter the political positions or the truthfulness of the claim. We&#39;ve covered them about Trump, Joe Biden and Barack Obama.</p>
+        
+      </article>
+    </main>
+  </body>
+</html>
