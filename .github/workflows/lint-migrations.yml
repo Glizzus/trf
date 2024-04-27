@@ -1,0 +1,17 @@
+name: Lint Migrations
+
+on:
+  pull_request:
+    paths:
+      - migrations/**
+  workflow_dispatch:
+
+jobs:
+  lint_migrations:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: sbdchd/squawk-action@v1
+        with:
+          pattern: migrations/*.sql
