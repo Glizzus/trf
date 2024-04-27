@@ -1,11 +1,11 @@
 CREATE TYPE rating AS ENUM (
-  'True', 'Mostly True', 'Mostly False', 
-  'False', 'Legit', 'Fake', 'Correct Attribution', 
-  'Misattributed', 'Unproven', 'Unfounded', 
-  'Outdated', 'Miscaptioned', 'Legend', 
-  'Scam', 'Labeled Satire', 'Originated as Satire', 
-  'Research in Progress', 'Mixture', 
-  'Lost Legend', 'Recall'
+    'True', 'Mostly True', 'Mostly False',
+    'False', 'Legit', 'Fake', 'Correct Attribution',
+    'Misattributed', 'Unproven', 'Unfounded',
+    'Outdated', 'Miscaptioned', 'Legend',
+    'Scam', 'Labeled Satire', 'Originated as Satire',
+    'Research in Progress', 'Mixture',
+    'Lost Legend', 'Recall'
 );
 
 COMMENT ON TYPE rating IS 'The rating of an article.
@@ -20,11 +20,11 @@ CREATE TABLE articles (
     date DATE NOT NULL,
 
     question TEXT NOT NULL,
-    rating rating NOT NULL,
+    rating RATING NOT NULL,
     context TEXT,
 
     content TEXT NOT NULL,
-  
+
     created_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
 
@@ -36,13 +36,16 @@ For example, the slug of https://www.snopes.com/fact-check/biden-banned-tiktok-i
 -- because there are semantic differences in the application. In normal use,
 -- there is no reason to query both articles and spoofs at the same time.
 CREATE TABLE spoofs (
-    id SERIAL PRIMARY KEY, 
-    slug TEXT NOT NULL UNIQUE REFERENCES articles(slug), 
-    rating rating NOT NULL, 
+    id SERIAL PRIMARY KEY,
+    slug TEXT NOT NULL UNIQUE REFERENCES articles (slug),
+    rating RATING NOT NULL,
     content TEXT NOT NULL,
 
     templated BOOLEAN NOT NULL DEFAULT FALSE
 );
 
-COMMENT ON TABLE spoofs IS 'Articles that the application has written to spoof an article from Snopes';
-COMMENT ON COLUMN spoofs.slug IS 'The slug of the article that this spoof is based on';
+COMMENT ON TABLE spoofs IS 'Articles that the application
+has written to spoof an article from Snopes';
+
+COMMENT ON COLUMN spoofs.slug IS 'The slug of the article
+that this spoof is based on';

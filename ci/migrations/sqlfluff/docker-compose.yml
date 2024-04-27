@@ -1,6 +1,7 @@
 services:
   sqlfluff:
     image: sqlfluff/sqlfluff:3.0.3
+    user: "${UID}:${GID}"
     working_dir: /output
     command:
       - lint
