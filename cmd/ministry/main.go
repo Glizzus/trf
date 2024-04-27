@@ -16,18 +16,94 @@ import (
 	_ "github.com/lib/pq"
 
 	"github.com/glizzus/trf/internal/dist"
-	repo "github.com/glizzus/trf/internal/repo/postgres"
+	postgresRepo "github.com/glizzus/trf/internal/repo/postgres"
 	"github.com/glizzus/trf/internal/scrape"
 	"github.com/glizzus/trf/internal/spoof"
 	"github.com/glizzus/trf/internal/templating"
 )
 
-func main() {
+// utility function to read the environment and create a distributor
+func getDistributor() (dist.Distributor, error) {
+	// Right now, we don't want to make this configurable.
+	// We don't want to allow the mock distributor to run outside of tests.
 
-	postgresURL := os.Getenv("POSTGRES_URL")
+	const minioBucketVar = "MINISTRY_MINIO_BUCKET"
+	const minioBucketDefault = "trf"
+	bucket := os.Getenv(minioBucketVar)
+	if bucket == "" {
+		slog.Warn(minioBucketVar + " is not set, defaulting to " + minioBucketDefault)
+		bucket = minioBucketDefault
+	}
+
+	const minioEndpointVar = "MINISTRY_MINIO_ENDPOINT"
+	const minioEndpointDefault = "minio:9000"
+	endpoint := os.Getenv(minioEndpointVar)
+	if endpoint == "" {
+		slog.Warn(minioEndpointVar + " is not set, defaulting to " + minioEndpointDefault)
+		endpoint = minioEndpointDefault
+	}
+
+	const minioUserVar = "MINISTRY_MINIO_USER"
+	const minioUserDefault = "minioadmin"
+	user := os.Getenv(minioUserVar)
+	if user == "" {
+		slog.Warn(minioUserVar + " is not set, defaulting to " + minioUserDefault)
+		user = minioUserDefault
+	}
+
+	const minioPasswordVar = "MINISTRY_MINIO_PASSWORD"
+	const minioPasswordDefault = "minioadmin"
+	password := os.Getenv(minioPasswordVar)
+	if password == "" {
+		slog.Warn(minioPasswordVar + " is not set, defaulting to " + minioPasswordDefault)
+		password = minioPasswordDefault
+	}
+
+	const minioSecureVar = "MINISTRY_MINIO_SECURE"
+	const minioSecureDefault = "false"
+	secure := os.Getenv(minioSecureVar)
+	if secure == "" {
+		slog.Warn(minioSecureVar + " is not set, defaulting to " + minioSecureDefault)
+		secure = minioSecureDefault
+	}
+
+	return dist.NewMinio(bucket, endpoint, user, password, secure == "true")
+}
+
+// utility function to read the environment and create a spoofer
+func getSpoofer() spoof.Spoofer {
+	const spooferVar = "MINISTRY_SPOOFER_TYPE"
+	// We default to the mock spoofer because the OpenAI API is not free.
+	const spooferDefault = "MOCK"
+	spoofer_type := strings.ToUpper(os.Getenv(spooferVar))
+	if spoofer_type == "" {
+		slog.Warn(spooferVar + " is not set, defaulting to " + spooferDefault)
+		spoofer_type = spooferDefault
+	}
+
+	switch spoofer_type {
+	case "MOCK":
+		return &spoof.MockSpoofer{}
+	case "OPENAI":
+		const openaiKeyVar = "MINISTRY_OPENAI_KEY"
+		apiKey := os.Getenv(openaiKeyVar)
+		if apiKey == "" {
+			panic(openaiKeyVar + " is not set")
+		}
+		return spoof.NewOpenAI(apiKey)
+	}
+	log.Fatalf("Unknown spoofer type: %s. Must be one of: MOCK, OPENAI", spoofer_type)
+	// Unreachable
+	return nil
+}
+
+// utility function to create a postgres client
+// This will fatal out if the database is not available after 5 tries.
+func getPostgresClient() *sql.DB {
+	postgresURL := os.Getenv("MINISTRY_POSTGRES_URL")
 	if postgresURL == "" {
 		defaultURL := "postgres://postgres:postgres@localhost:5432/trf?sslmode=disable"
-		slog.Warn("POSTGRES_URL is not set, defaulting to", "url", defaultURL)
+		slog.Warn("MINISTRY_POSTGRES_URL is not set, defaulting to", "url", defaultURL)
 		postgresURL = defaultURL
 	}
 
@@ -36,6 +112,7 @@ func main() {
 		log.Fatalf("Failed to open database: %v", err)
 	}
 
+	// We do multiple tries because we use docker-compose and the database may not be ready yet.
 	tries := 0
 	for {
 		if err = db.Ping(); err == nil {
@@ -47,6 +124,12 @@ func main() {
 		tries++
 		time.Sleep(5 * time.Second)
 	}
+	return db
+}
+
+// utility function to run migrations.
+// This will fatal out if the migrations fail.
+func doMigrations(db *sql.DB) {
 	driver, err := postgres.WithInstance(db, &postgres.Config{})
 	if err != nil {
 		log.Fatalf("Failed to create driver for migration: %v", err)
@@ -67,36 +150,24 @@ func main() {
 	} else {
 		slog.Info("Migrations run successfully")
 	}
+}
 
-	slog.Info("Starting server...")
-	slog.SetLogLoggerLevel(slog.LevelDebug)
+func main() {
 
-	spoofer_type := strings.ToUpper(os.Getenv("SPOOFER_TYPE"))
-	if spoofer_type == "" {
-		slog.Warn("SPOOFER_TYPE is not set, defaulting to mock")
-		spoofer_type = "MOCK"
+	if os.Getenv("MINISTRY_DEBUG") != "" {
+		slog.SetLogLoggerLevel(slog.LevelDebug)
 	}
 
-	var spoofer spoof.Spoofer
-	switch spoofer_type {
-	case "MOCK":
-		spoofer = &spoof.MockSpoofer{}
-	case "OPENAI":
-		apiKey := os.Getenv("OPENAI_API_KEY")
-		if apiKey == "" {
-			panic("OPENAI_API_KEY is not set")
-		}
-		spoofer = spoof.NewOpenAI(apiKey)
-	default:
-		log.Fatalf("Unknown spoofer type: %s. Must be one of: MOCK, OPENAI", spoofer_type)
-	}
+	db := getPostgresClient()
+	// We might want to seperate migrations from the application
+	doMigrations(db)
 
+	spoofer := getSpoofer()
 	scraper := scrape.GoqueryScraper{}
 	templater := templating.FileTemplater{}
-	articleRepo := repo.NewArticleRepo(db)
-	spoofRepo := repo.NewSpoofRepo(db)
-	// TODO: Make this configurable
-	distributor, err := dist.NewMinio("trf", "minio:9000", "minioadmin", "minioadmin", false)
+	articleRepo := postgresRepo.NewArticleRepo(db)
+	spoofRepo := postgresRepo.NewSpoofRepo(db)
+	distributor, err := getDistributor()
 	if err != nil {
 		log.Fatalf("Failed to create distributor: %v", err)
 	}
@@ -164,7 +235,7 @@ func main() {
 			slog.Error("Failed to put spoof", "error", err, "article", article.Title)
 			continue
 		}
-		if err := spoofRepo.MarkTemplated(ctx, spoof.Slug); err != nil {
+		if err := spoofRepo.MarkTemplated(ctx, spoof.Slug, true); err != nil {
 			slog.Error("Failed to mark spoof as templated", "error", err, "article", article.Title)
 			continue
 		}
@@ -184,14 +255,53 @@ func main() {
 	if err = distributor.Put(ctx, "latest", latestSpoofBytes); err != nil {
 		slog.Error("Failed to put latest spoofs", "error", err)
 	}
-}
 
-type SpoofRequest struct {
-	Content string `json:"content"`
-	Rating  string `json:"rating"`
-}
+	// Phase 3: Housekeeping
+	allSlugs, err := spoofRepo.AllSlugs(ctx)
+	if err != nil {
+		slog.Error("Failed to get all slugs", "error", err)
+		return
+	}
 
-type SpoofResponse struct {
-	Content     string  `json:"content"`
-	TimeToSpoof float64 `json:"time_to_spoof"`
+	for _, slug := range allSlugs {
+		distributed, err := distributor.Has(ctx, slug + ".html")
+		if err != nil {
+			/*
+				One thing we should consider is whether we should mark the spoof as not distributed if we fail to check.
+				For now, we will just log the error and continue.
+			*/
+			slog.Error("Failed to check if spoof is distributed", "error", err, "slug", slug)
+			continue
+		}
+		if distributed {
+			continue
+		}
+		slog.Info("Spoof is not distributed", "slug", slug)
+		if err := spoofRepo.MarkTemplated(ctx, slug, false); err != nil {
+			slog.Error("Failed to mark spoof as not templated", "error", err, "slug", slug)
+		}
+	}
+
+	// By this point, any spoof that is not distributed will be marked as not templated.
+	untemplatedSpoofs, err := spoofRepo.AllNotTemplated(ctx)
+	if err != nil {
+		slog.Error("Failed to get untemplated spoofs", "error", err)
+		return
+	}
+
+	for _, spoof := range untemplatedSpoofs {
+		bytes, err := templater.Spoof(spoof)
+		if err != nil {
+			slog.Error("Failed to template spoof", "error", err, "slug", spoof.Slug)
+			continue
+		}
+		if err = distributor.Put(ctx, spoof.Slug, bytes); err != nil {
+			slog.Error("Failed to put spoof", "error", err, "slug", spoof.Slug)
+			continue
+		}
+		if err := spoofRepo.MarkTemplated(ctx, spoof.Slug, true); err != nil {
+			slog.Error("Failed to mark spoof as templated", "error", err, "slug", spoof.Slug)
+			continue
+		}
+	}
 }

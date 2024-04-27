@@ -72,6 +72,30 @@ func (r *SpoofRepo) HasSpoof(ctx context.Context, slug string) (bool, error) {
 	return exists, nil
 }
 
+func (r *SpoofRepo) AllSlugs(ctx context.Context) ([]string, error) {
+	const query = `
+		SELECT slug
+		FROM spoofs
+	`
+
+	rows, err := r.db.QueryContext(ctx, query)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var slugs []string
+	for rows.Next() {
+		var slug string
+		if err := rows.Scan(&slug); err != nil {
+			return nil, err
+		}
+		slugs = append(slugs, slug)
+	}
+
+	return slugs, nil
+}
+
 func (r *SpoofRepo) AllNotTemplated(ctx context.Context) ([]*domain.Spoof, error) {
 	const query = `
 		SELECT
@@ -80,9 +104,9 @@ func (r *SpoofRepo) AllNotTemplated(ctx context.Context) ([]*domain.Spoof, error
 			articles.subtitle,
 			articles.date,
 			articles.question,
+			spoofs.rating,
 			articles.context,
-			spoofs.content,
-			spoofs.rating
+			spoofs.content
 		FROM spoofs
 		JOIN articles ON articles.slug = spoofs.slug
 		WHERE spoofs.templated = FALSE
@@ -106,14 +130,14 @@ func (r *SpoofRepo) AllNotTemplated(ctx context.Context) ([]*domain.Spoof, error
 	return spoofs, nil
 }
 
-func (r *SpoofRepo) MarkTemplated(ctx context.Context, slug string) error {
+func (r *SpoofRepo) MarkTemplated(ctx context.Context, slug string, isTemplated bool) error {
 	const query = `
 		UPDATE spoofs
-		SET templated = TRUE
+		SET templated = $2
 		WHERE slug = $1
 	`
 
-	_, err := r.db.ExecContext(ctx, query, slug)
+	_, err := r.db.ExecContext(ctx, query, slug, isTemplated)
 	return err
 }
 

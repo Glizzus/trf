@@ -21,13 +21,15 @@ type SpoofRepo interface {
 	// HasSpoof checks if a spoof with the given slug exists in the database.
 	HasSpoof(ctx context.Context, slug string) (bool, error)
 
+	AllSlugs(ctx context.Context) ([]string, error)
+
 	// AllNotTemplated returns all spoofs that are not templated.
 	// This doesn't actually know whether the templates exist, but rather whether
 	// the database has marked them as templated.
 	AllNotTemplated(ctx context.Context) ([]*domain.Spoof, error)
 
 	// MarkTemplated marks a spoof as templated.
-	MarkTemplated(ctx context.Context, slug string) error
+	MarkTemplated(ctx context.Context, slug string, isTemplated bool) error
 
 	// Close closes the database connection.
 	Close(ctx context.Context) error
