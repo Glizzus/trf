@@ -10,8 +10,13 @@ jobs:
   lint_migrations:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
 
-      - uses: sbdchd/squawk-action@v1
+      - name: Lint migrations
+        run: ci/migrations/sqlfluff/lint.sh
+
+      - name: Upload lint results
+        uses: actions/upload-artifact@v4
         with:
-          pattern: migrations/*.sql
+          name: sqlfluff-results
+          path: ci/migrations/sqlfluff/output/results.json

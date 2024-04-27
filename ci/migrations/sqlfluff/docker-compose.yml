@@ -1,0 +1,18 @@
+services:
+  sqlfluff:
+    image: sqlfluff/sqlfluff:3.0.3
+    working_dir: /output
+    command:
+      - lint
+      - /sql
+      - --format
+      - json
+      - --dialect
+      - postgres
+      - --write-output
+      - results.json
+      - --disable-progress-bar
+      - --nocolor
+    volumes:
+      - ../../../migrations:/sql
+      - ./output:/output
