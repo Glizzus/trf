@@ -2,12 +2,16 @@ package domain
 
 import "fmt"
 
+// Rating is a type that represents the rating of a claim.
 type Rating string
 
+// String returns the string representation of the rating.
 func (r Rating) String() string {
 	return string(r)
 }
 
+// ParseRating parses a string into a Rating.
+// If the string is not a valid rating, an error is returned.
 func ParseRating(s string) (Rating, error) {
 	if _, ok := ratingsOpposite[s]; !ok {
 		return "", fmt.Errorf("invalid rating: %s", s)
@@ -15,6 +19,7 @@ func ParseRating(s string) (Rating, error) {
 	return Rating(s), nil
 }
 
+// Opposite returns the opposite rating of the current rating.
 func (r Rating) Opposite() Rating {
 	return Rating(ratingsOpposite[r.String()])
 }
@@ -40,7 +45,7 @@ var ratingsOpposite = map[string]string{
 	"Miscaptioned":         "True",
 	"Legend":               "True",
 	"Scam":                 "True",
-	"Labeled Satire":         "True",
+	"Labeled Satire":       "True",
 	"Originated as Satire": "True",
 
 	// These are neutral, so they stay the same

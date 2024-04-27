@@ -1,34 +1,30 @@
 package domain
 
+import "time"
+
 type Claim struct {
 	Question string
 	Rating   Rating
 
-	Context string
-}
-
-type ArticleStub struct {
-	Link     string
-	Title    string
-	Subtitle string
+	Context *string
 }
 
 type Article struct {
-	Link     string
+	Slug     string
 	Title    string
 	Subtitle string
-	Date     string
+	Date     time.Time
 	Claim    Claim
 
-	Content []string
+	Content string
 }
 
 // ToSpoof converts an Article to a Spoof.
 // The newContent parameter is the content of the spoofed article.
 // Everything else is the same as the original article, except the rating is opposite.
-func (a *Article) ToSpoof(newContent []string) Spoof {
+func (a *Article) ToSpoof(newContent string) Spoof {
 	return Spoof{
-		Link:     a.Link,
+		Slug:     a.Slug,
 		Title:    a.Title,
 		Subtitle: a.Subtitle,
 		Date:     a.Date,

@@ -1,14 +1,45 @@
-version: '3.8'
-
 services:
-  ministry:
-    build: ministry
+  trf:
+    build: .
     ports:
       - "8080:8080"
+    environment:
+      MINISTRY_DEBUG: "true"
+      POSTGRES_URL: postgres://trf:trf@postgres:5432/trf?sslmode=disable
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
       interval: 30s
       timeout: 10s
       retries: 5
+    depends_on:
+      - postgres
+      - minio
+
+  postgres:
+    image: postgres:16.2
+    ports:
+      - "5432:5432"
     environment:
-      MINISTRY_DEBUG: "true"
+      POSTGRES_USER: "trf"
+      POSTGRES_PASSWORD: "trf"
+      POSTGRES_DB: "trf"
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "trf"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  minio:
+    image: minio/minio:latest
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: "minioadmin"
+      MINIO_ROOT_PASSWORD: "minioadmin"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 30s
+      timeout: 10s
+      retries: 5

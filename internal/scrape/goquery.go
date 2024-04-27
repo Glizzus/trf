@@ -6,11 +6,13 @@ import (
 	"log/slog"
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/PuerkitoBio/goquery"
 	"github.com/glizzus/trf/internal/domain"
 )
 
+// GoqueryScraper is a scraper that is implemented using the goquery library.
 type GoqueryScraper struct{}
 
 func (s *GoqueryScraper) docFromURL(ctx context.Context, url string) (*goquery.Document, error) {
@@ -29,43 +31,34 @@ func (s *GoqueryScraper) docFromURL(ctx context.Context, url string) (*goquery.D
 	return doc, nil
 }
 
-func (s *GoqueryScraper) LatestFactChecks(ctx context.Context) (stubs []domain.ArticleStub, err error) {
-	doc, err := s.docFromURL(ctx, "https://www.snopes.com/fact-check/")
+func (s *GoqueryScraper) LatestFactChecks(ctx context.Context) (slugs []string, err error) {
+	const baseURL = "https://www.snopes.com/fact-check/"
+	doc, err := s.docFromURL(ctx, baseURL)
 	if err != nil {
 		return nil, fmt.Errorf("unable to get document for latest fact checks: %w", err)
 	}
 	const selector = ".article_wrapper > .outer_article_link_wrapper"
 	elements := doc.Find(selector)
-	stubs = make([]domain.ArticleStub, elements.Length())
+	slugs = make([]string, elements.Length())
 	elements.Each(func(i int, s *goquery.Selection) {
-		url, ok := s.Attr("href")
+		articleURL, ok := s.Attr("href")
 		if !ok {
 			slog.Warn("No href found for latest fact check", "element", s)
 			return
 		}
-		stub := domain.ArticleStub{Link: url}
-
-		stub.Title = s.Find("h3").Text()
-		if stub.Title == "" {
-			slog.Warn("No title found for latest fact check", "element", s)
-		}
-
-		stub.Subtitle = s.Find("span.article_byline").Text()
-		if stub.Subtitle == "" {
-			slog.Warn("No subtitle found for latest fact check", "element", s)
-		}
-		stubs[i] = stub
+		slug := strings.TrimSuffix(strings.TrimPrefix(articleURL, baseURL), "/")
+		slugs[i] = slug
 	})
-	return stubs, nil
+	return slugs, nil
 }
 
-func (s *GoqueryScraper) ScrapeArticle(ctx context.Context, url string) (*domain.Article, error) {
-	doc, err := s.docFromURL(ctx, url)
+func (s *GoqueryScraper) ScrapeArticle(ctx context.Context, slug string) (*domain.Article, error) {
+	doc, err := s.docFromURL(ctx, "https://www.snopes.com/fact-check/"+slug)
 	if err != nil {
 		return nil, err
 	}
 	var article domain.Article
-	article.Link = url
+	article.Slug = slug
 
 	titleContainer := doc.Find("section.title-container")
 
@@ -79,12 +72,11 @@ func (s *GoqueryScraper) ScrapeArticle(ctx context.Context, url string) (*domain
 		return nil, fmt.Errorf("no subtitle found for article %s", doc.Url)
 	}
 
-	/* In the future, we may want to handle the data more sophisticatedly.
-	Right now, a string is fine */
-	article.Date = titleContainer.Find(".publish_date").Text()
-	if article.Date == "" {
+	dateString := strings.TrimSpace(titleContainer.Find(".publish_date").Text())
+	if dateString == "" {
 		return nil, fmt.Errorf("no date found for article %s", doc.Url)
 	}
+	article.Date, err = time.Parse("January 2, 2006", dateString)
 
 	factCheckContainer := doc.Find("#fact_check_rating_container")
 	question := factCheckContainer.Find(".claim_cont").Text()
@@ -113,13 +105,13 @@ func (s *GoqueryScraper) ScrapeArticle(ctx context.Context, url string) (*domain
 
 	context := factCheckContainer.Find(".fact_check_info_description").Text()
 	if context == "" {
-		article.Claim.Context = ""
+		article.Claim.Context = nil
 	} else {
-		article.Claim.Context = context
+		article.Claim.Context = &context
 	}
 
 	content := scrapeContent(doc.Find("#article-content"))
-	article.Content = content
+	article.Content = strings.Join(content, "\n")
 
 	return &article, nil
 }
