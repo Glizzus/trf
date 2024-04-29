@@ -11,4 +11,4 @@ export GIT_HASH="$git_hash"
 
 docker compose build --quiet
 
-echo "ghcr.io/glizzus/trf/propogator:build-${date}"
+echo "ghcr.io/glizzus/trf/nginx:build-${date}"
