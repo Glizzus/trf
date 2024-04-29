@@ -1,9 +1,15 @@
 name: Lint Migrations
 
 on:
+  # This is a cheap workflow, so we can run it every push
+  push:
+    paths:
+      - migrations/**
   pull_request:
     paths:
       - migrations/**
+    branches:
+      - main
   workflow_dispatch:
 
 jobs:

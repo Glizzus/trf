@@ -1,6 +1,6 @@
 services:
-  trf:
-    build: .
+  ministry:
+    build: ministry
     ports:
       - "8080:8080"
     environment:
@@ -14,6 +14,7 @@ services:
     depends_on:
       - postgres
       - minio
+      - minio-setup
 
   postgres:
     image: postgres:16.2
@@ -30,7 +31,7 @@ services:
       retries: 5
 
   minio:
-    image: minio/minio:latest
+    image: minio/minio:RELEASE.2024-04-18T19-09-19Z
     ports:
       - "9000:9000"
       - "9001:9001"
@@ -43,3 +44,23 @@ services:
       interval: 30s
       timeout: 10s
       retries: 5
+
+  minio-setup:
+    build: minio-setup
+    environment:
+      MINIO_URL: http://minio:9000
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+      MINISTRY_PASSWORD: ministry
+    depends_on:
+      - minio
+
+  nginx:
+    build: nginx
+    ports:
+      - "8000:80"
+    environment:
+      FILESERVICE_URL: http://minio:9000
+    depends_on:
+      - minio
+      - minio-setup

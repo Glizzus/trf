@@ -1,0 +1,8 @@
+services:
+  propogator:
+    image: ghcr.io/glizzus/trf/propogator:build-${DATE}
+    build:
+      context: ../../../propogator
+      args:
+        BUILD_TIME: ${DATE}
+        GIT_HASH: ${GIT_HASH}

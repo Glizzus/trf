@@ -264,7 +264,7 @@ func main() {
 	}
 
 	for _, slug := range allSlugs {
-		distributed, err := distributor.Has(ctx, slug + ".html")
+		distributed, err := distributor.Has(ctx, slug)
 		if err != nil {
 			/*
 				One thing we should consider is whether we should mark the spoof as not distributed if we fail to check.

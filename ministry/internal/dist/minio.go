@@ -51,8 +51,11 @@ func (m *Minio) Has(ctx context.Context, slug string) (bool, error) {
 
 func (m *Minio) Put(ctx context.Context, slug string, reader io.Reader) error {
 	const sizeUnknown = -1
-	path := slug + ".html"
-	_, err := m.client.PutObject(ctx, m.Bucket, path, reader, sizeUnknown, minio.PutObjectOptions{})
+	path := slug
+	options := minio.PutObjectOptions{
+		ContentType: "text/html",
+	}
+	_, err := m.client.PutObject(ctx, m.Bucket, path, reader, sizeUnknown, options)
 	if err != nil {
 		return fmt.Errorf("unable to put object: %w", err)
 	}
