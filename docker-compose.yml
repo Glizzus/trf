@@ -1,6 +1,24 @@
 services:
   ministry:
     build: ministry
+    develop:
+      watch:
+        - action: rebuild
+          path: ministry/cmd
+        - action: rebuild
+          path: ministry/internal
+        - action: rebuild
+          path: ministry/go.mod
+        - action: rebuild
+          path: ministry/go.sum
+
+        - action: sync+restart
+          path: migrations
+          target: /app/migrations
+
+        - action: sync
+          path: ministry/templates
+          target: /app/static
     ports:
       - "8080:8080"
     environment:
@@ -57,10 +75,18 @@ services:
 
   nginx:
     build: nginx
+    develop:
+      watch:
+        - action: sync
+          path: nginx/static
+          target: /usr/share/nginx/static
+        - action: sync+restart
+          path: nginx/nginx.conf.template
+          target: /etc/nginx/templates/nginx.conf.template
     ports:
       - "8000:80"
     environment:
-      FILESERVICE_URL: http://minio:9000
+      FILESERVICE_URL: http://minio:9000/trf
     depends_on:
       - minio
       - minio-setup

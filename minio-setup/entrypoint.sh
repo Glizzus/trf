@@ -32,7 +32,7 @@ function set_minio_alias() {
 check_env_vars
 set_minio_alias
 
-mc mb minio/trf
+mc mb --ignore-existing minio/trf
 # The bucket will be publicly readonly
 mc anonymous set download minio/trf
 
@@ -65,6 +65,7 @@ EOF
 
 mc admin user add minio ministry "$MINISTRY_PASSWORD"
 mc admin policy create minio ministry /tmp/ministry-policy.json
-mc admin policy attach minio ministry --user ministry
+
+mc admin policy attach minio ministry --user ministry || true
 
 exec "$@"

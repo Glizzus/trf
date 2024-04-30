@@ -5,20 +5,20 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>TotallyRealFacts</title>
-    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="css/style.css">
   </head>
   <body>
-	<script src="index.js"></script>
+	<script src="js/index.js"></script>
     <div class="latest-facts">
-        <ul>
-          {{range .}}
-            <li>
-              <p>
-                <a href="{{.Slug}}">{{.Title}}</a>
-              </p>
-            </li>
-          {{end}}
-        </ul>
+      <ul>
+        {{range .}}
+          <li>
+            <p>
+              <a href="{{.Slug}}">{{.Title}}</a>
+            </p>
+          </li>
+        {{end}}
+      </ul>
     </div>
   </body>
 </html>

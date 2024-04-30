@@ -1,15 +1,15 @@
-FROM golang AS builder
+FROM golang:1.22-alpine3.19 AS builder
 
 WORKDIR /app
-ADD go.mod go.sum ./
+COPY go.mod go.sum ./
 RUN go mod download && go mod verify
 
-ADD internal/ internal/
-ADD cmd/ cmd/
+COPY internal/ internal/
+COPY cmd/ cmd/
 
 RUN --mount=type=cache,target="/root/.cache/go-build" GOCACHE=/root/.cache/go-build CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o ministry ./cmd/ministry
 
-FROM alpine:latest
+FROM alpine:3.19.1
 
 LABEL org.opencontainers.image.created="${BUILD_TIME}"
 LABEL org.opencontainers.image.source="https://github.com/glizzus/trf"
