@@ -1,16 +1,35 @@
 # Environment variables
 # ---------------------
 # FILESERVICE_URL - URL of the file service
-# For example: http://localhost:8080, https://minio.example.com
+# For example: http://localhost:9000, https://minio.example.com
 
 server {
     listen 80;
-    location / {
+
+    # We want all redirects to be relative. This is because, if we run Nginx behind Docker,
+    # there will be a port mismatch between what Nginx is running on inside the container
+    # and what the client is expecting. This will cause the client to receive a redirect
+    # to the wrong port. By setting absolute_redirect to off, we ensure that all redirects
+    # are relative, which means that the client will use the same port as the one it used
+    # to connect to Nginx.
+    absolute_redirect off;
+
+    index /facts/latest;
+
+    location /facts/ {
         proxy_pass $FILESERVICE_URL/;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-Proto $scheme;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    }
+
+    # Health check endpoint for Docker, Kubernetes, etc.
+    location /health {
+        # We don't want to log every health check request
+        access_log off;
+        add_header Content-Type text/plain;
+        return 200 "OK";
     }
 
     location /css {
