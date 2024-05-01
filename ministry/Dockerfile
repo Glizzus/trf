@@ -9,8 +9,10 @@ RUN go mod download && go mod verify
 COPY internal/ internal/
 COPY cmd/ cmd/
 
-RUN --mount=type=cache,target="/root/.cache/go-build" \
-    GOCACHE=/root/.cache/go-build CGO_ENABLED=0 \
+ARG BUILD_CACHE=/root/.cache/go-build
+RUN --mount=type=cache,target=${BUILD_CACHE} \
+    GOCACHE=${BUILD_CACHE} \
+    CGO_ENABLED=0 \
     GOOS=linux \
     go build -ldflags="-s -w" -a -installsuffix cgo -o ministry ./cmd/ministry
 
