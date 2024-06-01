@@ -9,6 +9,7 @@ import (
 	"log/slog"
 	"net/http"
 	"os"
+	"strings"
 	"time"
 
 	_ "github.com/lib/pq"
@@ -158,13 +159,15 @@ func main() {
 			//
 			// 1. If we are using OpenAI, we will be rate limited.
 			// 2. If we are using our own LLM, we will get lower quality spoofs due to resource constraints.
-			spoofContent, err := spoofer.Spoof(context.Background(), article.Content, article.Claim.Rating.String())
+			content := strings.Join(article.Content, "\n")
+			spoofContent, err := spoofer.Spoof(context.Background(), content, article.Claim.Rating.String())
 			if err != nil {
 				slog.Error("failed to spoof article", "slug", slug, "error", err)
 				continue
 			}
 
-			spoof := article.ToSpoof(spoofContent)
+			spoofContentSplit := strings.Split(spoofContent, "\n")
+			spoof := article.ToSpoof(spoofContentSplit)
 
 			if err := repo.SaveSpoof(context.Background(), spoof); err != nil {
 				slog.Error("failed to save spoof", "slug", slug, "error", err)

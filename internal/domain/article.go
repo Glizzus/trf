@@ -11,18 +11,20 @@ type Claim struct {
 
 type Article struct {
 	Slug     string    `json:"slug"`
+
 	Title    string    `json:"title"`
 	Subtitle string    `json:"subtitle"`
 	Date     time.Time `json:"date"`
+
 	Claim    Claim     `json:"claim"`
 
-	Content string `json:"content"`
+	Content []string `json:"content"`
 }
 
 // ToSpoof converts an Article to a Spoof.
 // The newContent parameter is the content of the spoofed article.
 // Everything else is the same as the original article, except the rating is opposite.
-func (a *Article) ToSpoof(newContent string) Spoof {
+func (a *Article) ToSpoof(newContent[] string) Spoof {
 	return Spoof{
 		Slug:     a.Slug,
 		Title:    a.Title,

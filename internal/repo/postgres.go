@@ -36,7 +36,7 @@ func (r *PostgresRepo) SaveArticle(ctx context.Context, article domain.Article) 
 		article.Claim.Question,
 		article.Claim.Rating,
 		article.Claim.Context,
-		article.Content,
+		pq.Array(article.Content),
 	)
 	return err
 }
@@ -47,7 +47,7 @@ func (r *PostgresRepo) SaveSpoof(ctx context.Context, spoof domain.Spoof) error 
 		VALUES ($1, $2, $3)
 	`
 
-	_, err := r.db.ExecContext(ctx, query, spoof.Slug, spoof.Claim.Rating, spoof.Content)
+	_, err := r.db.ExecContext(ctx, query, spoof.Slug, spoof.Claim.Rating, pq.Array(spoof.Content))
 	return err
 }
 
@@ -76,7 +76,7 @@ func (r *PostgresRepo) GetSpoof(ctx context.Context, slug string) (domain.Spoof,
 		&spoof.Claim.Question,
 		&spoof.Claim.Rating,
 		&spoof.Claim.Context,
-		&spoof.Content,
+		pq.Array(&spoof.Content),
 	); err != nil {
 		return domain.Spoof{}, err
 	}

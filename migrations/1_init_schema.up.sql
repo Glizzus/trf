@@ -14,7 +14,7 @@ A list can be found here: https://www.snopes.com/fact-check-ratings/';
 
 CREATE TABLE articles (
     id SERIAL PRIMARY KEY,
-    slug TEXT NOT NULL UNIQUE,
+    slug TEXT NOT NULL UNIQUE CONSTRAINT slug_not_empty CHECK (slug <> ''),
     title TEXT NOT NULL,
     subtitle TEXT NOT NULL,
     date DATE NOT NULL,
@@ -23,7 +23,7 @@ CREATE TABLE articles (
     rating RATING NOT NULL,
     context TEXT,
 
-    content TEXT NOT NULL,
+    content TEXT[] NOT NULL,
 
     created_at TIMESTAMP NOT NULL DEFAULT NOW()
 );

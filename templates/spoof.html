@@ -37,9 +37,11 @@
           </div>
           {{ end }}
         </section>
+        {{ range .Content }}
         <p>
-          {{ .Content }}
+          {{ . }}
         </p>
+        {{ end }}
       </article>
     </main>
   </body>

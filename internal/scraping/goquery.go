@@ -168,8 +168,8 @@ func (s *GoqueryScraper) ScrapeArticle(ctx context.Context, slug string) (articl
 	}
 	article.Claim = claim
 
-	content := scrapeContent(doc.Find("#article-content"))
-	article.Content = strings.Join(content, "\n")
+	article.Content = scrapeContent(doc.Find("#article-content"))
+	article.Slug = slug
 
 	return article, nil
 }
