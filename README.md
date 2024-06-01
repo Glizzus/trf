@@ -1,70 +1,102 @@
-# Ministry of Truth
+# Totally Real Facts
 
-The ministry is the service responsible for spoofing articles.
+Totally Real Facts is a parody website of Snopes.
 
-It is named for the Ministry of Truth in George Orwell's novel 1984.
+## Getting Started
 
-## Environment Variables
+### Requirements
 
-| Name | Description | Values | Default | Required | Depends On |
-|------|-------------|--------|---------|----------|------------|
-| `MINISTRY_SPOOFER_TYPE` | The type of spoofer to use | `OPENAI`, `MOCK` | `MOCK` | Yes | |
-| `MINISTRY_SPOOFER_OPENAI_API_KEY` | The OpenAI API key | | | Conditional | `MINISTRY_SPOOFER_TYPE=OPENAI` |
-| `MINISTRY_PROMPT_TYPE` | The type of prompt to use. | `FILE`, `STATIC` | `STATIC` | Yes | |
-| `MINISTRY_PROMPT_FILE` | The file containing the prompt. | | | No | |
+- [Docker](https://www.docker.com/)
 
-## Prompt Templates
+- [Docker Compose](https://docs.docker.com/compose/)
 
-When creating custom prompts, there are two required templates: `system.tmpl` and `user.tmpl`.
+- [Go](https://golang.org/) (Optional)
 
-### `system.tmpl`
+- [PostgreSQL](https://www.postgresql.org/) (Optional)
 
-This template is used to generate the system's directive to the AI. Currently, no variables are passed to this template.
+### Running with Docker Compose
 
-Example:
-
-```
-You are the Ministry of Truth. You will be given an article, as well as a rating. You must write a parody of the article.
+```bash
+docker-compose up --build
 ```
 
-### `user.tmpl`
+If you have Docker Compose 2.22.0 or later, you can develop with hot reload:
 
-This template is used to template the article to feed to the AI. There are two variables; the first is the content, and the second is the rating.
-
-Example:
-
-```
-The following article is rated {{.Rating}}:
-
-{{.Content}}
-
-Please write a parody of the article.
+```bash
+docker compose up --build --watch
 ```
 
+### Running with Go
+
+Currently, running with Golang is cumbersome, but can be done with the following steps:
+
+1. Install Go dependencies:
+
+    ```bash
+    go mod download
+    ```
+
+2. Export environment variables:
+
+    ```bash
+    # Postgres
+    export MINISTRY_POSTGRES_HOST=localhost
+    export MINISTRY_POSTGRES_USER=ministry
+    export MINISTRY_POSTGRES_PASSWORD=ministry
+    export MINISTRY_POSTGRES_DB=ministry
+
+    # Spoofing
+    export SPOOFER_TYPE=mock
+    ```
+
+3. Run the server:
+
+    ```bash
+    go run cmd/ministry/main.go serve
+    ```
+
+## Configuration
+
+### Environment Variables
+
+- Postgres
+
+    | Name | Description | Required |
+    | --- | --- | --- |
+    | `MINISTRY_POSTGRES_HOST` | PostgreSQL host | Yes |
+    | `MINISTRY_POSTGRES_USER` | PostgreSQL user | Yes |
+    | `MINISTRY_POSTGRES_PASSWORD` | PostgreSQL password | Yes |
+    | `MINISTRY_POSTGRES_DB` | PostgreSQL database | Yes |
+    | `MINISTRY_POSTGRES_PORT` | PostgreSQL port | No (default: `5432`) |
+
+- Spoofing
+
+    | Name | Description | Required |
+    | --- | --- | --- |
+    | `MINISTRY_SPOOFER_TYPE` | Type of spoofer to use. Options are `mock`, and `openai` | Yes |
+    | `MINISTRY_OPENAI_KEY` | OpenAI API key (required if `MINISTRY_SPOOFER_TYPE` is `openai`) | No |
 
 ## Endpoints
 
-### `GET /health`
+### `GET /latest`
 
-Returns a 200 status code if the service is healthy.
+- Description: Returns a HTML page cataloging the latest articles.
 
-### `POST /spoof`
+- Response:
+  - Content-Type: `text/html`
+  - Body: [Click here to view the full HTML template](./templates/latest.html)
 
-Spoofs an article.
+### `GET /{slug}`
 
-#### Request
+- Description: Returns a HTML page for a specific article.
 
-```json
-{
-  "content": "The quick brown fox jumps over the lazy dog.",
-  "rating": "True"
-}
-```
+- Response:
+  - Content-Type: `text/html`
+  - Body: [Click here to view the full HTML template](./templates/article.html)
 
-#### Response
+### `GET /healthz`
 
-```json
-{
-  "content": "The quick brown fox never jumped over the lazy dog."
-}
-```
+- Description: Returns a 200 status code if the server is healthy.
+
+- Response:
+  - Status Code: `200`

@@ -1,8 +1,0 @@
-services:
-  ministry:
-    image: ghcr.io/glizzus/trf/ministry:build-${DATE}
-    build:
-      context: ../../../ministry
-      args:
-        BUILD_TIME: ${DATE}
-        GIT_HASH: ${GIT_HASH}

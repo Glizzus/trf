@@ -1,8 +1,0 @@
-services:
-  nginx:
-    image: ghcr.io/glizzus/trf/nginx:build-${DATE}
-    build:
-      context: ../../../nginx
-      args:
-        BUILD_TIME: ${DATE}
-        GIT_HASH: ${GIT_HASH}
