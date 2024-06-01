@@ -10,11 +10,11 @@ type Claim struct {
 }
 
 type Article struct {
-	Slug     string `json:"slug"`
-	Title    string `json:"title"`
-	Subtitle string `json:"subtitle"`
+	Slug     string    `json:"slug"`
+	Title    string    `json:"title"`
+	Subtitle string    `json:"subtitle"`
 	Date     time.Time `json:"date"`
-	Claim    Claim `json:"claim"`
+	Claim    Claim     `json:"claim"`
 
 	Content string `json:"content"`
 }

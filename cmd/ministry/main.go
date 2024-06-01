@@ -3,17 +3,15 @@ package main
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"html/template"
+	"log"
+	"log/slog"
+	"net/http"
 	"os"
 	"time"
 
-	"net/http"
-
 	_ "github.com/lib/pq"
-
-	"fmt"
-	"log"
-	"log/slog"
 
 	"github.com/sethvargo/go-envconfig"
 
@@ -72,7 +70,6 @@ func getSpoofer(cfg *SpooferConfig) spoofing.Spoofer {
 }
 
 func main() {
-
 	command := os.Args[1]
 	if command == "healthcheck" {
 		res, err := http.Get("http://localhost/healthz")
@@ -169,7 +166,7 @@ func main() {
 
 			spoof := article.ToSpoof(spoofContent)
 
-			if err := repo.SaveSpoof(context.Background(), &spoof); err != nil {
+			if err := repo.SaveSpoof(context.Background(), spoof); err != nil {
 				slog.Error("failed to save spoof", "slug", slug, "error", err)
 				continue
 			}
@@ -198,7 +195,7 @@ func main() {
 	latestTmpl := template.Must(template.ParseFiles("templates/latest.html"))
 	spoofTmpl := template.Must(template.ParseFiles("templates/spoof.html"))
 
-	//This handler should be defined first because it is ambiguous with the below handler
+	// This handler should be defined first because it is ambiguous with the below handler
 	// on the path "/{slug}".
 	http.HandleFunc("GET /latest", func(w http.ResponseWriter, r *http.Request) {
 		stubs, err := repo.GetLatestSpoofStubs(r.Context())

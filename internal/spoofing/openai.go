@@ -23,7 +23,6 @@ func NewOpenAI(apiKey string) *OpenAISpoofer {
 
 // Spoof generates a spoofed message using OpenAI's API.
 func (o *OpenAISpoofer) Spoof(ctx context.Context, content, rating string) (string, error) {
-
 	// We may want to pull these out of the source code, but this is fine for now.
 	const systemPrompt = "You will read a Snopes article." +
 		"Your task is to write a new article in the same style as the original article." +

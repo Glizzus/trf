@@ -10,15 +10,17 @@ import (
 	"github.com/glizzus/trf/internal/domain"
 )
 
+// PostgresRepo is a PostgreSQL implementation of the Repo interface.
 type PostgresRepo struct {
 	db *sql.DB
 }
 
+// NewPostgres creates a new PostgresRepo with the given database connection.
 func NewPostgres(db *sql.DB) *PostgresRepo {
 	return &PostgresRepo{db: db}
 }
 
-func (r *PostgresRepo) SaveArticle(ctx context.Context, article *domain.Article) error {
+func (r *PostgresRepo) SaveArticle(ctx context.Context, article domain.Article) error {
 	const query = `
 		INSERT INTO articles (slug, title, subtitle, date, question, rating, context, content)
 		VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
@@ -39,37 +41,7 @@ func (r *PostgresRepo) SaveArticle(ctx context.Context, article *domain.Article)
 	return err
 }
 
-func (r *PostgresRepo) SaveSpoofs(ctx context.Context, spoofs []domain.Spoof) error {
-	const query = `
-		INSERT INTO spoofs (slug, rating, content)
-		VALUES ($1, $2, $3)
-	`
-
-	tx, err := r.db.BeginTx(ctx, nil)
-	if err != nil {
-		return fmt.Errorf("error beginning transaction: %w", err)
-	}
-
-	stmt, err := tx.PrepareContext(ctx, query)
-	if err != nil {
-		return fmt.Errorf("error preparing statement: %w", err)
-	}
-	defer stmt.Close()
-
-	for _, spoof := range spoofs {
-		if _, err := stmt.ExecContext(ctx, spoof.Slug, spoof.Claim.Rating, spoof.Content); err != nil {
-			return fmt.Errorf("error executing statement: %w", err)
-		}
-	}
-
-	if err := tx.Commit(); err != nil {
-		return fmt.Errorf("error committing transaction: %w", err)
-	}
-
-	return nil
-}
-
-func (r *PostgresRepo) SaveSpoof(ctx context.Context, spoof *domain.Spoof) error {
+func (r *PostgresRepo) SaveSpoof(ctx context.Context, spoof domain.Spoof) error {
 	const query = `
 		INSERT INTO spoofs (slug, rating, content)
 		VALUES ($1, $2, $3)
