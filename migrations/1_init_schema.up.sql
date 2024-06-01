@@ -28,8 +28,11 @@ CREATE TABLE articles (
     created_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
 
+COMMENT ON CONSTRAINT slug_not_empty ON articles IS 'The slug of a Snopes article cannot be empty';
+
 COMMENT ON TABLE articles IS 'Articles that Snopes has written and rated';
 COMMENT ON COLUMN articles.slug IS 'The slug of the article.
+It is used as the primary identifier of an article.
 For example, the slug of https://www.snopes.com/fact-check/biden-banned-tiktok-in-us/ is "biden-banned-tiktok-in-us"';
 
 -- We make this a new table instead of adding a column to the articles table

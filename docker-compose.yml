@@ -1,5 +1,4 @@
 services:
-
   nginx:
     build:
       target: nginx
@@ -16,10 +15,6 @@ services:
         - path: ./static
           action: sync
           target: /usr/share/nginx/html
-
-        - path: ./nginx.conf
-          action: sync+restart
-          target: /etc/nginx/templates/nginx.conf.template
     volumes:
       - trf-nginx-cache:/data/nginx/cache
     healthcheck:
@@ -49,10 +44,8 @@ services:
       watch:
         - path: ./templates
           action: rebuild
-        - path: ./cmd
-          action: rebuild
-        - path: ./internal
-          action: rebuild 
+        # We could also watch for changes in the Go source code,
+        # but recompiling the binary is too slow for hot reloading.
     healthcheck:
       test: ["CMD", "/ministry", "healthcheck"]
       interval: 5s
