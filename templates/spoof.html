@@ -10,37 +10,28 @@
   <body>
     <header>
       <p>Totally Real Facts</p>
+      <nav>
+        <ul>
+          <li class="nav-link"><a href="/">Home</a></li>
+        </ul>
+      </nav>
     </header>
     <main>
-      <section class="header-title-container">
-        <h1>{{ .Title }}</h1>
-        <h2>{{ .Subtitle }}</h2>
-        <div class="author-date-container">
-          <h3>By Real Authorington</h3>
-          <h2>{{ .Date.Format "January 2, 2006" }}</h2>
-        </div>
-      </section>
+      <h1>{{ .Title }}</h1>
+      <h2>{{ .Subtitle }}</h2>
+      <!-- TODO: Add Dynamic Fake Author -->
+      <h3>By Real Authorington</h3>
+      <time datetime={{ .Date.Format "2006-1-2"}}>{{ .Date.Format "January 2, 2006" }}</time>
       <article>
-        <section class="claim-and-rating">
-          <div class="claim-content-container">
-            <div class="label-wrapper">Claim:</div>
-            <div class="claim-text">{{ .Claim.Question }}</h3>
-          </div>
-          <div class="claim-rating-container">
-            <div class="label-wrapper">Rating:</div>
-            <div class="rating-text">{{ .Claim.Rating }}</div>
-          </div>
+        <section>
+          <p>Claim: {{ .Claim.Question }}</p>
+          <p>Rating: {{ .Claim.Rating }}</p>
           {{ if .Claim.Context }}
-          <div class="claim-context-container">
-            <span>Context:</span>
-            <p>{{ .Claim.Context }}</p>
-          </div>
+          <p>Context: {{ .Claim.Context }}</p>
           {{ end }}
         </section>
         {{ range .Content }}
-        <p>
-          {{ . }}
-        </p>
+        <p>{{ . }}</p>
         {{ end }}
       </article>
     </main>
